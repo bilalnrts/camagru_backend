@@ -18,7 +18,7 @@
     "compile": "tsc",
     "fix": "gts fix",
     "start": "node dist/app.js",
-    "start-nodemon": "nodemon dist/app.js",
+    "compile-start": "clear && tsc && node dist/app.js",
     "prepare": "npm.cmd run compile",
     "pretest": "npm.cmd run compile",
     "posttest": "npm.cmd run lint"

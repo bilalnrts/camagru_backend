@@ -1,12 +1,16 @@
-import {Request, Response} from 'express';
+import {Response} from 'express';
+import {AuthUserRequest} from '../../types';
+import {withMiddleware} from '../../middleware/withMiddleware';
+import {isAuth} from '../../middleware/isAuth';
 
-export const createPost = async (req: Request, res: Response) => {
-  try {
-    return res.status(201).json({message: 'success.'});
-  } catch (err) {
-    console.log(err);
-    return res
-      .status(500)
-      .json({error: 'An error occurred while creating post.'});
-  }
-};
+export const createPost = withMiddleware(isAuth)(async (
+  req: AuthUserRequest,
+  res: Response
+) => {
+  // Burada req.user kesinlikle var
+  const {userId, username} = req.user;
+
+  console.log(userId, username);
+
+  return res.status(200).json({message: 'success'});
+});
