@@ -1,14 +1,45 @@
+/**
+ * @fileoverview Kullanıcı girişi ile ilgili controller işlevlerini içerir
+ * @module controllers/auth/login
+ */
+
 import {Request, Response} from 'express';
 import {z} from 'zod';
 import {UserModel} from '../../models/user';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
+/**
+ * Login schema validation için Zod object tanımı
+ * @constant {z.ZodObject}
+ */
 const loginSchema = z.object({
   username: z.string().min(2).max(30),
   password: z.string().min(6).max(30),
 });
 
+/**
+ * Kullanıcı girişi için controller fonksiyonu
+ * @async
+ * @param {Request} req - Express request nesnesi
+ * @param {Response} res - Express response nesnesi
+ * @returns {Promise<Response>} JSON response ile kullanıcı bilgileri ve token
+ *
+ * @throws {400} - Geçersiz giriş verileri durumunda
+ * @throws {404} - Kullanıcı bulunamadığında veya şifre yanlış olduğunda
+ * @throws {500} - Sunucu hatası durumunda
+ *
+ * @example
+ * // Başarılı yanıt örneği
+ * {
+ *   message: "Login successful",
+ *   token: "jwt-token-string",
+ *   user: {
+ *     id: "user-id",
+ *     username: "username"
+ *   }
+ * }
+ */
 export const login = async (req: Request, res: Response) => {
   try {
     const validatedData = loginSchema.parse(req.body);

@@ -1,8 +1,17 @@
+/**
+ * @fileoverview Kullanıcı kaydı işlemlerini yöneten controller modülü
+ * @module controllers/auth/register
+ */
+
 import {Request, Response} from 'express';
 import {z} from 'zod';
 import bcrypt from 'bcrypt';
 import {UserModel} from '../../models/user';
 
+/**
+ * Kullanıcı kayıt verilerinin doğrulanması için Zod şema tanımı
+ * @constant {z.ZodObject}
+ */
 const registerSchema = z.object({
   name: z.string().min(2).max(30),
   surname: z.string().min(2).max(30),
@@ -11,6 +20,38 @@ const registerSchema = z.object({
   password: z.string().min(6).max(20),
 });
 
+/**
+ * Yeni kullanıcı kaydı oluşturan controller fonksiyonu
+ *
+ * @async
+ * @param {Request} req - Express request nesnesi
+ * @param {Response} res - Express response nesnesi
+ * @returns {Promise<Response>} JSON response ile oluşturulan kullanıcı bilgileri
+ *
+ * @throws {400} - Geçersiz kayıt verileri veya mevcut kullanıcı durumunda
+ * @throws {500} - Sunucu hatası durumunda
+ *
+ * @example
+ * // İstek body örneği
+ * {
+ *   "name": "John",
+ *   "surname": "Doe",
+ *   "email": "john@example.com",
+ *   "username": "johndoe",
+ *   "password": "123456"
+ * }
+ *
+ * // Başarılı yanıt örneği
+ * {
+ *   "message": "User created successfully.",
+ *   "user": {
+ *     "name": "John",
+ *     "surname": "Doe",
+ *     "email": "john@example.com",
+ *     "username": "johndoe"
+ *   }
+ * }
+ */
 export const register = async (req: Request, res: Response) => {
   try {
     const validatedData = registerSchema.parse(req.body);
