@@ -1,9 +1,8 @@
-import { Request, Response } from 'express';
-import { z } from 'zod';
+import {Request, Response} from 'express';
+import {z} from 'zod';
 import bcrypt from 'bcrypt';
-import { UserModel } from '../../models/user';
+import {UserModel} from '../../models/user';
 
-// Validation şeması
 const registerSchema = z.object({
   name: z.string().min(2).max(30),
   surname: z.string().min(2).max(30),
@@ -14,50 +13,41 @@ const registerSchema = z.object({
 
 export const register = async (req: Request, res: Response) => {
   try {
-    // Request body'i validate et
     const validatedData = registerSchema.parse(req.body);
 
-    // Email ve username kontrolü
     const existingUser = await UserModel.findOne({
-      $or: [
-        { email: validatedData.email },
-        { username: validatedData.username }
-      ]
+      $or: [{email: validatedData.email}, {username: validatedData.username}],
     });
 
     if (existingUser) {
       return res.status(400).json({
-        message: 'Bu email veya kullanıcı adı zaten kullanımda'
+        message: 'This username or email already taken.',
       });
     }
 
-    // Şifreyi hashle
     const hashedPassword = await bcrypt.hash(validatedData.password, 10);
 
-    // Yeni kullanıcı oluştur
     const user = await UserModel.create({
       ...validatedData,
-      password: hashedPassword
+      password: hashedPassword,
     });
 
-    // Hassas bilgileri çıkar
-    const { password, ...userWithoutPassword } = user.toObject();
+    const {password, ...userWithoutPassword} = user.toObject();
 
     return res.status(201).json({
-      message: 'Kullanıcı başarıyla oluşturuldu',
-      user: userWithoutPassword
+      message: 'User created successfully.',
+      user: userWithoutPassword,
     });
-
   } catch (error) {
     if (error instanceof z.ZodError) {
       return res.status(400).json({
-        message: 'Geçersiz veri',
-        errors: error.errors
+        message: 'Invalid data.',
+        errors: error.errors,
       });
     }
 
     return res.status(500).json({
-      message: 'Bir hata oluştu'
+      message: 'An error occurred while creating user.',
     });
   }
 };
