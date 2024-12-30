@@ -8,7 +8,7 @@ const registerSchema = z.object({
   surname: z.string().min(2).max(30),
   email: z.string().email().min(2).max(60),
   username: z.string().min(2).max(30),
-  password: z.string().min(6).max(200),
+  password: z.string().min(6).max(20),
 });
 
 export const register = async (req: Request, res: Response) => {
