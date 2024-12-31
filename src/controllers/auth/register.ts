@@ -7,6 +7,8 @@ import {Request, Response} from 'express';
 import {z} from 'zod';
 import bcrypt from 'bcrypt';
 import {UserModel} from '../../models/user';
+import mongoose from 'mongoose';
+import {UserPreferencesModel} from '../../models/preferences';
 
 /**
  * Kullanıcı kayıt verilerinin doğrulanması için Zod şema tanımı
@@ -53,6 +55,9 @@ const registerSchema = z.object({
  * }
  */
 export const register = async (req: Request, res: Response) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
   try {
     const validatedData = registerSchema.parse(req.body);
 
@@ -61,6 +66,7 @@ export const register = async (req: Request, res: Response) => {
     });
 
     if (existingUser) {
+      await session.abortTransaction();
       return res.status(400).json({
         message: 'This username or email already taken.',
       });
@@ -68,18 +74,36 @@ export const register = async (req: Request, res: Response) => {
 
     const hashedPassword = await bcrypt.hash(validatedData.password, 10);
 
-    const user = await UserModel.create({
-      ...validatedData,
-      password: hashedPassword,
-    });
+    const user = await UserModel.create(
+      [
+        {
+          ...validatedData,
+          password: hashedPassword,
+        },
+      ],
+      {session}
+    );
 
-    const {password, ...userWithoutPassword} = user.toObject();
+    await UserPreferencesModel.create(
+      [
+        {
+          user: user[0]._id,
+        },
+      ],
+      {session}
+    );
+
+    await session.commitTransaction();
+
+    const {password, ...userWithoutPassword} = user[0].toObject();
 
     return res.status(201).json({
       message: 'User created successfully.',
       user: userWithoutPassword,
     });
   } catch (error) {
+    await session.abortTransaction();
+
     if (error instanceof z.ZodError) {
       return res.status(400).json({
         message: 'Invalid data.',
@@ -90,5 +114,7 @@ export const register = async (req: Request, res: Response) => {
     return res.status(500).json({
       message: 'An error occurred while creating user.',
     });
+  } finally {
+    session.endSession();
   }
 };
