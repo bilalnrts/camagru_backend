@@ -18,3 +18,8 @@ export type MiddlewareFunction = (
   res: Response,
   next: NextFunction
 ) => Promise<void | Response> | void | Response;
+
+export interface FolderDirs {
+  parent: string;
+  children?: FolderDirs[];
+}
