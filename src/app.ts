@@ -8,6 +8,7 @@ import {POSTS_DIR, PROFILE_PICS_DIR} from './constants';
 import InitService from './services/initService';
 import RouterService from './services/routerService';
 import FeedService from './services/feedService';
+import NotificationService from './services/notificationService';
 
 //create static folders
 const initService = new InitService();
@@ -15,6 +16,9 @@ initService.CreateStaticFolders();
 
 //initialize FeedService
 FeedService.getInstance();
+
+//initialize NotificationService
+NotificationService.getInstance();
 
 const app = express();
 dotenv.config();
