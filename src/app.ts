@@ -4,9 +4,9 @@ import cors from 'cors';
 import mongoose from 'mongoose';
 import * as path from 'node:path';
 import dotenv from 'dotenv';
-import {getAllRoutes} from './appRouter';
 import {POSTS_DIR, PROFILE_PICS_DIR} from './constants';
 import InitService from './services/initService';
+import RouterService from './services/routerService';
 
 //create static folders
 const initService = new InitService();
@@ -27,7 +27,9 @@ app.use('/images', express.static(PROFILE_PICS_DIR));
 const PORT = process.env.PORT || 8080;
 
 mongoose.connect(process.env.MONGO_URI as string).then(result => {
-  getAllRoutes(path.join(__dirname, 'routes')).then(val => {
+  const routerService = new RouterService();
+
+  routerService.getAllRoutes(path.join(__dirname, 'routes')).then(val => {
     app.use(val);
     app.listen(PORT, () => console.log(`Running on port ${PORT}`));
   });
