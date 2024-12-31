@@ -9,6 +9,8 @@ import {withMiddleware} from '../../middleware/withMiddleware';
 import {isAuth} from '../../middleware/isAuth';
 import {z} from 'zod';
 import {PostModel} from '../../models/post';
+import multer from 'multer';
+import MulterService from '../../services/multerService';
 
 /**
  * Post oluşturma için gerekli veri validasyon şeması
@@ -18,8 +20,12 @@ import {PostModel} from '../../models/post';
  * @property {string} [description] - Post açıklaması (opsiyonel)
  */
 const createPostSchema = z.object({
-  urls: z.string().array().min(1),
-  description: z.string().optional(),
+  description: z.string().max(2200).optional(),
+});
+
+const upload = multer({
+  storage: MulterService.postFileStorage,
+  fileFilter: MulterService.postFileFilter,
 });
 
 /**
@@ -58,22 +64,40 @@ const createPostSchema = z.object({
  *
  * @security Bearer Token gerektirir (isAuth middleware üzerinden)
  */
-export const createPost = withMiddleware(isAuth)(async (
-  req: AuthUserRequest,
-  res: Response
-) => {
+export const createPost = withMiddleware(
+  isAuth,
+  upload.array('files')
+)(async (req: AuthUserRequest, res: Response) => {
   try {
     const {userId} = req.user;
 
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({
+        message: 'At least one file must be uploaded.',
+      });
+    }
+
     const validatedData = createPostSchema.parse(req.body);
+
+    const fileUrls = (req.files as Express.Multer.File[]).map(file => {
+      return file.filename;
+    });
 
     const post = await PostModel.create({
       owner: userId,
-      urls: validatedData.urls,
+      urls: fileUrls,
       description: validatedData.description,
     });
 
-    return res.status(200).json({message: 'success', post: post});
+    const postObject = post.toObject();
+
+    return res.status(200).json({
+      message: 'success',
+      post: {
+        ...postObject,
+        urls: postObject.urls.map(url => `images/${url}`),
+      },
+    });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return res.status(400).json({
