@@ -7,10 +7,14 @@ import dotenv from 'dotenv';
 import {POSTS_DIR, PROFILE_PICS_DIR} from './constants';
 import InitService from './services/initService';
 import RouterService from './services/routerService';
+import FeedService from './services/feedService';
 
 //create static folders
 const initService = new InitService();
 initService.CreateStaticFolders();
+
+//initialize FeedService
+FeedService.getInstance();
 
 const app = express();
 dotenv.config();

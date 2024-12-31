@@ -11,6 +11,7 @@ import {z} from 'zod';
 import {PostModel} from '../../models/post';
 import multer from 'multer';
 import MulterService from '../../services/multerService';
+import AppEventEmitter from '../../services/eventEmitter';
 
 /**
  * Post oluşturma için gerekli veri validasyon şeması
@@ -87,6 +88,11 @@ export const createPost = withMiddleware(
       owner: userId,
       urls: fileUrls,
       description: validatedData.description,
+    });
+
+    AppEventEmitter.getInstance().emit('post:created', {
+      postId: post._id.toString(),
+      userId: userId,
     });
 
     const postObject = post.toObject();
