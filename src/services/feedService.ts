@@ -18,6 +18,7 @@ class FeedService {
 
   private initializeEventListeners() {
     this.eventEmitter.on('post:created', this.handlePostCreated.bind(this));
+    this.eventEmitter.on('post:archived', this.handlePostArchived.bind(this));
   }
 
   private async handlePostCreated(data: {
@@ -25,6 +26,13 @@ class FeedService {
     userId: string;
   }): Promise<void> {
     console.log(`created: ${data.postId} ${data.userId}`);
+  }
+
+  private async handlePostArchived(data: {
+    postId: string;
+    userId: string;
+  }): Promise<void> {
+    console.log(`archived: ${data.postId} ${data.userId}`);
   }
 }
 
