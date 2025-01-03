@@ -5,8 +5,12 @@ interface IPost {
   owner: mongoose.Types.ObjectId;
   likeCount: number;
   commentCount: number;
+  numberOfShows: number;
+  likeShowsRate: number;
+  commentShowsRate: number;
   urls: string[];
   description?: string;
+  onFeed: boolean;
   status: 'active' | 'deleted' | 'hidden';
 }
 
@@ -15,6 +19,10 @@ const postSchema = new Schema<IPost>(
     owner: {type: Schema.Types.ObjectId, ref: 'User', required: true},
     likeCount: {type: Number, default: 0},
     commentCount: {type: Number, default: 0},
+    numberOfShows: {type: Number, default: 0},
+    commentShowsRate: {type: Number, default: 0},
+    likeShowsRate: {type: Number, default: 0},
+    onFeed: {type: Boolean, default: false},
     urls: {
       type: [String],
       required: true,
