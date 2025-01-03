@@ -9,6 +9,7 @@ import InitService from './services/initService';
 import RouterService from './services/routerService';
 import FeedService from './services/feedService';
 import NotificationService from './services/notificationService';
+import GeminiService from './services/geminiService';
 
 //create static folders
 const initService = new InitService();
@@ -19,6 +20,8 @@ FeedService.getInstance();
 
 //initialize NotificationService
 NotificationService.getInstance();
+
+//initialize GeminiService
 
 const app = express();
 dotenv.config();
@@ -40,5 +43,6 @@ mongoose.connect(process.env.MONGO_URI as string).then(result => {
   routerService.getAllRoutes(path.join(__dirname, 'routes')).then(val => {
     app.use(val);
     app.listen(PORT, () => console.log(`Running on port ${PORT}`));
+    GeminiService.getInstance();
   });
 });

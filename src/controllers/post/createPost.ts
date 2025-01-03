@@ -90,9 +90,15 @@ export const createPost = withMiddleware(
       description: validatedData.description,
     });
 
+    const files = (req.files as Express.Multer.File[]).map(file => ({
+      path: `static/posts/${file.filename}`,
+      mimeType: file.mimetype,
+    }));
+
     AppEventEmitter.getInstance().emit('post:created', {
       postId: post._id.toString(),
       userId: userId,
+      files,
     });
 
     const postObject = post.toObject();
