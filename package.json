@@ -20,7 +20,7 @@
     "fix": "gts fix",
     "start": "node dist/app.js",
     "compile-start": "clear && tsc && node dist/app.js",
-    "prepare": "npm.cmd run compile",
+    "prepare": "npm run compile",
     "pretest": "npm.cmd run compile",
     "posttest": "npm.cmd run lint"
   },
